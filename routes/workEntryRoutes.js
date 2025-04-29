@@ -38,7 +38,7 @@ router.post("/", auth, async (req, res) => {
     }
 
     const totalHours = (end - start) / (1000 * 60 * 60)
-    const amountEarned = totalHours * 100
+    const amountEarned = totalHours * 60
 
     const workEntry = new WorkEntry({
       student: req.user._id,
