@@ -3,6 +3,12 @@ const router = express.Router()
 const WorkEntry = require("../models/WorkEntry")
 const auth = require("../middleware/auth")
 
+const dayjs = require("dayjs")
+const utc = require("dayjs/plugin/utc")
+const timezone = require("dayjs/plugin/timezone")
+dayjs.extend(utc)
+dayjs.extend(timezone)
+
 // Create a new work entry
 router.post("/", auth, async (req, res) => {
   try {
@@ -23,8 +29,9 @@ router.post("/", auth, async (req, res) => {
       return res.status(400).json({ error: "Required fields missing" })
     }
 
-    const start = new Date(inTime)
-    const end = new Date(outTime)
+    // Convert input date strings (assumed to be in local time) to Date objects in IST
+    const start = dayjs.tz(inTime, "Asia/Kolkata").toDate()
+    const end = dayjs.tz(outTime, "Asia/Kolkata").toDate()
 
     if (end <= start) {
       return res.status(400).json({ error: "Out time must be after in time" })
@@ -74,7 +81,9 @@ router.get("/", auth, async (req, res) => {
       return res.status(403).send({ error: "Access denied" })
     }
 
-    const entries = await WorkEntry.find({}).populate("student", "email").sort({ createdAt: -1 })
+    const entries = await WorkEntry.find({})
+      .populate("student", "email")
+      .sort({ createdAt: -1 })
     res.send(entries)
   } catch (err) {
     res.status(500).send({ error: "Failed to fetch work entries" })
@@ -93,10 +102,11 @@ router.patch("/:id/status", auth, async (req, res) => {
       return res.status(400).send({ error: "Invalid status" })
     }
 
-    const entry = await WorkEntry.findByIdAndUpdate(req.params.id, { status }, { new: true }).populate(
-      "student",
-      "email",
-    )
+    const entry = await WorkEntry.findByIdAndUpdate(
+      req.params.id,
+      { status },
+      { new: true }
+    ).populate("student", "email")
 
     if (!entry) {
       return res.status(404).send({ error: "Work entry not found" })
