@@ -118,4 +118,19 @@ router.patch("/:id/status", auth, async (req, res) => {
   }
 })
 
+router.delete("/:id", auth, async (req, res) => {
+  try {
+
+    const entry = await WorkEntry.findByIdAndDelete(req.params.id)
+
+    if (!entry) {
+      return res.status(404).send({ error: "Work entry not found" })
+    }
+
+    res.send({ message: "Work entry deleted successfully" })
+  } catch (err) {
+    res.status(500).send({ error: "Failed to delete work entry" })
+  }
+})
+
 module.exports = router
