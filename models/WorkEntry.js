@@ -15,7 +15,7 @@ const workEntrySchema = new mongoose.Schema(
     division: { type: String, required: true },
     collegeName: { type: String, required: true },
     prnNumber: { type: String, required: true },
-    aadharNumber: { type: String, required: true },
+    aadharNumber: { type: String, required: false },
   },
   { timestamps: true },
 )
